@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 resolution = 15  # Reduced resolution for quicker simulation
 wavelengths = [605e-9, 625e-9]  # wavelengths in meters
 frequencies = [1 / wl for wl in wavelengths]  # frequencies corresponding to the wavelengths
-block_length = 2
+block_length = 2.5
 
 # Simulation domain size
 sx = 5  # size of cell in x direction
@@ -56,24 +56,39 @@ def run_simulation(frequency):
 
     # Extract the field data behind the column (e.g., at z = 2.5)
     z_slice = block_length / 2 + 0.5
-    field_data = sim.get_array(center=mp.Vector3(0, 0, z_slice), size=mp.Vector3(sx, sy, 0), component=mp.Ez)
-    return field_data
+    field_data = sim.get_array(center=mp.Vector3(0, 0, z_slice), size=mp.Vector3(1, 1, 0), component=mp.Ez)
+    return np.array(field_data)
 
 # Run simulations for both wavelengths
 fields_605nm = run_simulation(frequencies[0])
 fields_625nm = run_simulation(frequencies[1])
 
+# Convert field data to numpy arrays
+fields_605nm_array = np.array(fields_605nm)
+fields_625nm_array = np.array(fields_625nm)
+
+def array_to_binary(array_605, array_625): # np arrays to binary for easier comparison
+    binary_string_605 = np.array2string(array_605) #arrays to binary string
+    binary_string_625 = np.array2string(array_625) 
+    binary_array_605 = np.frombuffer(binary_string_605)
+    binary_array_625 = np.fromstring(binary_string_625)
+    return binary_array_605, binary_array_625
+
 # Plotting the results for 605 nm
-plt.figure()
-plt.imshow(np.abs(fields_605nm.transpose()), interpolation='spline36', cmap='RdBu')
+"""plt.figure()
+plt.imshow(np.abs(fields_605nm_array.transpose()), interpolation='spline36', cmap='RdBu')
 plt.colorbar()
 plt.title('Field Intensity at z = {:.2f} for 605 nm (Behind the Column)'.format(block_length / 2 + 0.5))
 plt.show()
 
 # Plotting the results for 625 nm
 plt.figure()
-plt.imshow(np.abs(fields_625nm.transpose()), interpolation='spline36', cmap='RdBu')
+plt.imshow(np.abs(fields_625nm_array.transpose()), interpolation='spline36', cmap='RdBu')
 plt.colorbar()
 plt.title('Field Intensity at z = {:.2f} for 625 nm (Behind the Column)'.format(block_length / 2 + 0.5))
-plt.show()
+plt.show()"""
+
+bin_605, _ = array_to_binary(fields_605nm_array, fields_625nm_array)
+print(np.shape(bin_605))
+print(bin_605)
 
